@@ -119,7 +119,6 @@ func (b *SseBroker) SendMessage(msg string) {
 	b.messages <- msg
 }
 
-// SendMap broadcast simple string
 func (b *SseBroker) SendMap(msg map[string]interface{}) {
 	buffer, _ := json.Marshal(msg)
 	b.messages <- string(buffer)
@@ -153,7 +152,7 @@ func (b *SseBroker) DelClient(cli *SseClient) {
 }
 
 // SseThread handles the addition & removal of clients, as well as the broadcasting
-// of messages out to clients that are currently attached.
+// of messages out to clients that are currently attached
 func (b *SseBroker) SseThread() {
 	for {
 		select {
@@ -191,7 +190,7 @@ func ReadUserIP(r *http.Request) string {
 	return ip
 }
 
-// ServeHTTP handles and HTTP request at the "/events/" URL.
+// ServeHTTP handles and HTTP request at the "/events/" URL
 func (b *SseBroker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if b.debugLog {
 		log.Print("SSE: SseBroker.ServeHTTP started")

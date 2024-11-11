@@ -22,7 +22,6 @@ var LocalServer bool = false
 // DefaultBrowser если пусто, запускается браузер по умолчанию
 var DefaultBrowser string
 
-// PanicHandler обрабатывает все паники в хэндлерах
 func PanicHandler(w http.ResponseWriter) {
 	if r := recover(); r != nil {
 		var err error
@@ -40,7 +39,6 @@ func PanicHandler(w http.ResponseWriter) {
 	}
 }
 
-// ReadInputJSON читает произвольный json в карту
 func ReadInputJSON(w http.ResponseWriter, r *http.Request) map[string]interface{} {
 	var data map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -124,7 +122,6 @@ func Serve(ctx context.Context, port int, page string, serverSSE *SseBroker, pro
 	return err
 }
 
-// Run основная процедура
 func Run(serve func(context.Context, chan os.Signal) error) {
 	logger := logger.NewLogger()
 	defer logger.Close()

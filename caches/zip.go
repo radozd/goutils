@@ -11,7 +11,6 @@ import (
 	"github.com/klauspost/compress/zstd"
 )
 
-// CreateZipFile creates new zip file from list
 func CreateZipFile(zipPath string, files []string) error {
 	archive, err := os.Create(zipPath)
 	if err != nil {

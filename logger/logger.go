@@ -8,8 +8,10 @@ import (
 	"strings"
 )
 
-// EchoConsole - в консоль будет писаться то же, что и в лог
+// в консоль будет писаться то же, что и в лог
 var EchoConsole bool = false
+
+// раскрашиваем вывод в консоль тегами. в логе теги остаются
 var VT100Console bool = false
 
 type VT100Writer struct {

@@ -16,6 +16,7 @@ func TestProcessInfo(t *testing.T) {
 
 func TestTerminal(t *testing.T) {
 	logger.EchoConsole = true
+	logger.VT100Console = true
 	l := logger.NewLogger()
 	defer l.Close()
 

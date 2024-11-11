@@ -6,7 +6,6 @@ import (
 	"github.com/radozd/goutils/text"
 )
 
-// List of possible colors
 const (
 	BLACK      = 30
 	RED        = 31
@@ -27,12 +26,12 @@ const (
 	BOLD       = 1000
 )
 
-func getColor(code int) string {
+func Color(code int) string {
 	return fmt.Sprintf("\033[%dm", code)
 }
 
-const setBold string = "\033[1m"
-const resetAttr string = "\033[0m"
+const Bold string = "\033[1m"
+const ResetAttr string = "\033[0m"
 
 func colorizeVT100(s string) string {
 	do := func(s string, brackets string, color int) string {
@@ -42,9 +41,9 @@ func colorizeVT100(s string) string {
 		for {
 			var s2 string
 			if color != BOLD {
-				s2 = text.ReplaceBetweenInc(s, a, b, getColor(color)+text.TakeBetween(s, a, b)+resetAttr)
+				s2 = text.ReplaceBetweenInc(s, a, b, Color(color)+text.TakeBetween(s, a, b)+ResetAttr)
 			} else {
-				s2 = text.ReplaceBetweenInc(s, a, b, setBold+text.TakeBetween(s, a, b)+resetAttr)
+				s2 = text.ReplaceBetweenInc(s, a, b, Bold+text.TakeBetween(s, a, b)+ResetAttr)
 			}
 			if s == s2 {
 				break
@@ -54,21 +53,20 @@ func colorizeVT100(s string) string {
 		return s
 	}
 
-	s = do(s, "{}", BG_RED) // error
-	s = do(s, "[]", RED)    // important
-	s = do(s, "``", GREEN)  // string
-	s = do(s, "##", BLUE)   // number
-
+	s = do(s, "{}", BG_RED)
+	s = do(s, "[]", RED)
+	s = do(s, "``", GREEN)
+	s = do(s, "##", BLUE)
 	s = do(s, "**", BOLD)
 
 	return s
 }
 
-func V100Sprintf(format string, a ...any) string {
+func VT100Sprintf(format string, a ...any) string {
 	s := fmt.Sprintf(format, a...)
 	return colorizeVT100(s)
 }
 
-func V100Printf(format string, a ...any) {
-	fmt.Print(V100Sprintf(format, a...))
+func VT100Printf(format string, a ...any) {
+	fmt.Print(VT100Sprintf(format, a...))
 }
