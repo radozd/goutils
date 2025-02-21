@@ -62,6 +62,31 @@ func colorizeVT100(s string) string {
 	return s
 }
 
+func colorizeHtml(s string) string {
+
+	do := func(s string, brackets string, color string) string {
+		a := string(brackets[0])
+		b := string(brackets[1])
+
+		for {
+			s2 := text.ReplaceBetweenInc(s, a, b, "<span class=\""+color+"\">"+text.TakeBetween(s, a, b)+"</span>")
+			if s == s2 {
+				break
+			}
+			s = s2
+		}
+		return s
+	}
+
+	s = do(s, "{}", "BG_RED")
+	s = do(s, "[]", "RED")
+	s = do(s, "``", "GREEN")
+	s = do(s, "##", "BLUE")
+	s = do(s, "**", "BOLD")
+
+	return s
+}
+
 func VT100Sprintf(format string, a ...any) string {
 	s := fmt.Sprintf(format, a...)
 	return colorizeVT100(s)
@@ -69,4 +94,9 @@ func VT100Sprintf(format string, a ...any) string {
 
 func VT100Printf(format string, a ...any) {
 	fmt.Print(VT100Sprintf(format, a...))
+}
+
+func HtmlSprintf(format string, a ...any) string {
+	s := fmt.Sprintf(format, a...)
+	return colorizeHtml(s)
 }
