@@ -2,9 +2,61 @@ package text
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 	"unicode"
 )
+
+func CountLetters(s string) int {
+	n := 0
+	for _, r := range s {
+		if unicode.IsLetter(r) {
+			n++
+		}
+	}
+	return n
+}
+
+func CountDigits(s string) int {
+	n := 0
+	for _, r := range s {
+		if unicode.IsDigit(r) {
+			n++
+		}
+	}
+	return n
+}
+
+func CountRows(s string) int {
+	if s == "" {
+		return 0
+	}
+
+	i := strings.Count(s, "\n")
+	if s[len(s)-1] != '\n' {
+		i++
+	}
+	return i
+}
+
+func CountLeadingSpaces(s string) int {
+	count := 0
+	for _, char := range s {
+		if char == ' ' {
+			count++
+		} else {
+			break
+		}
+	}
+	return count
+}
+
+func CutBack(s, sep string) (before, after string, found bool) {
+	if i := strings.LastIndex(s, sep); i >= 0 {
+		return s[:i], s[i+len(sep):], true
+	}
+	return s, "", false
+}
 
 func StringAfterPrefix(s string, prefix string) string {
 	if prefix == "" {
@@ -51,6 +103,13 @@ func TextContainsFullSubstring(text string, substr string) bool {
 	return false
 }
 
+func ScanToEol(s string) string {
+	if idx := strings.Index(s, "\n"); idx >= 0 {
+		return s[:idx]
+	}
+	return s
+}
+
 func TextContainsAnyFullSubstring(text string, substr []string) bool {
 	for _, w := range substr {
 		if TextContainsFullSubstring(text, w) {
@@ -60,20 +119,37 @@ func TextContainsAnyFullSubstring(text string, substr []string) bool {
 	return false
 }
 
-func StringInArray(s string, variants []string) bool {
-	for _, v := range variants {
-		if s == v {
+func TextContainsAnySubstring(text string, substr []string) bool {
+	for _, w := range substr {
+		if strings.Contains(text, w) {
 			return true
 		}
 	}
 	return false
 }
 
-func MaxCommonString(a, b string) string {
-	l := len([]rune(a))
-	if l > len([]rune(b)) {
-		l = len([]rune(b))
+func TextHasAnyPrefix(text string, prefixes []string) bool {
+	for _, p := range prefixes {
+		if strings.HasPrefix(text, p) {
+			return true
+		}
 	}
+	return false
+}
+
+func AddedWords(a, b string) []string {
+	words := strings.Fields(a)
+	l := len(words)
+	for _, w2 := range strings.Fields(b) {
+		if !slices.Contains(words, w2) {
+			words = append(words, w2)
+		}
+	}
+	return words[l:]
+}
+
+func MaxCommonString(a, b string) string {
+	l := min(len([]rune(a)), len([]rune(b)))
 
 	var dst string
 	for i := 0; i < l; i++ {
@@ -93,7 +169,46 @@ func RemoveMultiSpaces(s string) string {
 }
 
 func CompressString(s string) string {
-	return strings.TrimSpace(RemoveMultiSpaces(s))
+	return strings.Join(strings.Fields(s), " ")
+}
+
+func ReplaceDoubleSpaces(s string) string {
+	b := []byte(s)
+	n := len(b)
+	res := make([]byte, 0, n)
+
+	for i := 0; i < n; {
+		if i > 0 && i < n-2 && b[i] == ' ' && b[i+1] == ' ' && b[i+2] != ' ' {
+			res = append(res, ' ')
+			i += 2
+			continue
+		}
+		res = append(res, b[i])
+		i++
+	}
+	return string(res)
+}
+
+func TrimPrefixes(s string, prefixes []string) string {
+	for _, p := range prefixes {
+		if s2, ok := strings.CutPrefix(s, p); ok {
+			return s2
+		}
+	}
+	return s
+}
+
+func SplitAlphaNumericWord(word string) (string, string) {
+	for i := 0; i < len(word); i++ {
+		b := word[i]
+		if b >= '0' && b <= '9' {
+			if i == 0 {
+				return word, ""
+			}
+			return word[:i], word[i:]
+		}
+	}
+	return word, ""
 }
 
 func replaceChars(s string, charSet string, new string) string {
@@ -192,39 +307,6 @@ func SplitToWords(text string, minWordLen int) []string {
 		}
 	}
 	return words
-}
-
-func NormalizeUnicode(s string) string {
-	s = strings.ReplaceAll(s, "µ", "u")
-	s = strings.ReplaceAll(s, "½", "1/2")
-	s = strings.ReplaceAll(s, "⅓", "1/3")
-	s = strings.ReplaceAll(s, "²", "2")
-	s = strings.ReplaceAll(s, "³", "3")
-	s = strings.ReplaceAll(s, "œ", "oe")
-	s = strings.ReplaceAll(s, "æ", "ae")
-	s = strings.ReplaceAll(s, "’", "'")
-	s = strings.ReplaceAll(s, "×", "x")
-	s = replaceChars(s, "“”«»", "\"")
-	s = replaceChars(s, "°€®©", " ")
-	return s
-}
-
-func NormalizeSpaces(s string) string {
-	s = strings.ReplaceAll(s, "( ", "(")
-	s = strings.ReplaceAll(s, " )", ")")
-	s = strings.ReplaceAll(s, " /", "/")
-	s = strings.ReplaceAll(s, "/ ", "/")
-	s = strings.ReplaceAll(s, " ,", ",")
-	s = strings.ReplaceAll(s, " .", ".")
-	s = strings.ReplaceAll(s, " :", ":")
-	return s
-}
-
-func NormalizeString(s string) string {
-	s = strings.ToLower(s)
-	s = NormalizeUnicode(s)
-	s = NormalizeSpaces(s)
-	return s
 }
 
 // берет содержимое строки между `start` и `end`. если `end` пуст, то берет до конца строки
