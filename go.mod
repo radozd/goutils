@@ -1,6 +1,6 @@
 module github.com/radozd/goutils
 
-go 1.20
+go 1.23.0
 
 require modernc.org/sqlite v1.27.0
 

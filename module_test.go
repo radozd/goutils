@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/radozd/goutils/caches"
+	"github.com/radozd/goutils/collections"
 	"github.com/radozd/goutils/logger"
-	"github.com/radozd/goutils/slices"
 )
 
 func TestProcessInfo(t *testing.T) {
@@ -37,15 +37,8 @@ func TestZstd(t *testing.T) {
 }
 
 func TestUniq(t *testing.T) {
-	sl := slices.MergeSlices([]string{"1", "2", "3"}, []string{"2", "3", "4"})
+	sl := collections.MergeSlices([]string{"1", "2", "3"}, []string{"2", "3", "4"})
 	if len(sl) != 4 || sl[0] != "1" || sl[1] != "2" || sl[2] != "3" || sl[3] != "4" {
 		t.Error("bad merge:", sl)
-	}
-}
-
-func TestMapKeys(t *testing.T) {
-	sl := slices.MapKeys(map[string]bool{"2": false, "1": false, "3": true})
-	if len(sl) != 3 || sl[0] != "1" || sl[1] != "2" || sl[2] != "3" {
-		t.Error("bad map:", sl)
 	}
 }
