@@ -21,6 +21,7 @@ func TestTerminal(t *testing.T) {
 	defer l.Close()
 
 	log.Println("{test} `string` *number* to do")
+	log.Printf("[warning] newer file at the same path: `%s`\n", "/Total Rekall.mp4")
 }
 
 func TestZstd(t *testing.T) {
