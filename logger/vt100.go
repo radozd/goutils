@@ -54,9 +54,12 @@ func colorizeVT100(s string) string {
 	}
 
 	s = do(s, "{}", BG_RED)
-	s = do(s, "[]", RED)
-	s = do(s, "``", GREEN)
+
+	s = do(s, "``", RED)
+	s = do(s, "''", GREEN)
 	s = do(s, "##", BLUE)
+	s = do(s, "@@", YELLOW)
+
 	s = do(s, "**", BOLD)
 
 	return s
@@ -79,17 +82,19 @@ func colorizeHtml(s string) string {
 	}
 
 	s = do(s, "{}", "BG_RED")
-	s = do(s, "[]", "RED")
-	s = do(s, "``", "GREEN")
+
+	s = do(s, "``", "RED")
+	s = do(s, "''", "GREEN")
 	s = do(s, "##", "BLUE")
+	s = do(s, "@@", "YELLOW")
+
 	s = do(s, "**", "BOLD")
 
 	return s
 }
 
 func VT100Sprintf(format string, a ...any) string {
-	s := fmt.Sprintf(format, a...)
-	return colorizeVT100(s)
+	return fmt.Sprintf(colorizeVT100(format), a...)
 }
 
 func VT100Printf(format string, a ...any) {
@@ -97,6 +102,5 @@ func VT100Printf(format string, a ...any) {
 }
 
 func HtmlSprintf(format string, a ...any) string {
-	s := fmt.Sprintf(format, a...)
-	return colorizeHtml(s)
+	return fmt.Sprintf(colorizeHtml(format), a...)
 }
