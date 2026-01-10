@@ -8,6 +8,7 @@ import (
 	"github.com/radozd/goutils/caches"
 	"github.com/radozd/goutils/collections"
 	"github.com/radozd/goutils/logger"
+	"github.com/radozd/goutils/vt100"
 )
 
 func TestProcessInfo(t *testing.T) {
@@ -21,9 +22,9 @@ func TestTerminal(t *testing.T) {
 
 	log.Println("{test} 'string' #number# to *do*")
 	log.Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total *R*ekall.mp4")
-	logger.VT100Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total *R*ekall.mp4")
-	logger.VT100ColorizeParams = true
-	logger.VT100Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total *R*ekall.mp4")
+	vt100.Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total *R*ekall.mp4")
+	vt100.ColorizeParams = true
+	vt100.Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total *R*ekall.mp4")
 	l.Close()
 }
 

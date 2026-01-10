@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/radozd/goutils/vt100"
 )
 
 // в консоль будет писаться то же, что и в лог
@@ -13,10 +15,6 @@ var EchoConsole bool = false
 
 // раскрашиваем вывод в консоль тегами. в логе теги остаются
 var VT100Console bool = false
-
-// раскрашиваем только строку форматирования или сначала форматируем, потом раскрашиваем.
-// Во втором случае надо экранировать спецсимволы.
-var VT100ColorizeParams bool = false
 
 type VT100Writer struct {
 	w io.Writer
@@ -27,7 +25,7 @@ func NewVT100Writer(w io.Writer) VT100Writer {
 }
 
 func (vt VT100Writer) Write(p []byte) (n int, err error) {
-	s := colorizeVT100(string(p))
+	s := vt100.ColorizeVT100(string(p))
 	if n, err := vt.w.Write([]byte(s)); err != nil {
 		return n, err
 	}
@@ -43,7 +41,7 @@ func NewVT100DummyWriter(w io.Writer) VT100DummyWriter {
 }
 
 func (vt VT100DummyWriter) Write(p []byte) (n int, err error) {
-	s := stripVT100(string(p))
+	s := vt100.StripMarkers(string(p))
 	if n, err := vt.w.Write([]byte(s)); err != nil {
 		return n, err
 	}

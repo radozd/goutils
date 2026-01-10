@@ -1,4 +1,4 @@
-package logger
+package vt100
 
 import (
 	"fmt"
@@ -6,6 +6,10 @@ import (
 
 	"github.com/radozd/goutils/text"
 )
+
+// раскрашиваем только строку форматирования или сначала форматируем, потом раскрашиваем.
+// Во втором случае надо экранировать спецсимволы.
+var ColorizeParams bool = false
 
 const (
 	BLACK      = 30
@@ -34,7 +38,7 @@ func Color(code int) string {
 const Bold string = "\033[1m"
 const ResetAttr string = "\033[0m"
 
-func stripVT100(s string) string {
+func StripMarkers(s string) string {
 	do := func(s string, brackets string) string {
 		a := string(brackets[0])
 		b := string(brackets[1])
@@ -61,7 +65,23 @@ func stripVT100(s string) string {
 	return s
 }
 
-func colorizeVT100(s string) string {
+func EscapeMarkers(s string) string {
+	repl := []struct{ from, to string }{
+		{"*", "∗"}, // U+2217 ASTERISK OPERATOR
+		{"#", "＃"}, // U+FF03 FULLWIDTH NUMBER SIGN
+		{"'", "’"}, // U+2019 RIGHT SINGLE QUOTATION MARK
+		{"{", "｛"}, // U+FF5B FULLWIDTH LEFT CURLY BRACKET
+		{"}", "｝"}, // U+FF5D FULLWIDTH RIGHT CURLY BRACKET
+	}
+	for _, r := range repl {
+		if strings.Contains(s, r.from) {
+			s = strings.ReplaceAll(s, r.from, r.to)
+		}
+	}
+	return s
+}
+
+func ColorizeVT100(s string) string {
 	do := func(s string, brackets string, color int) string {
 		a := string(brackets[0])
 		b := string(brackets[1])
@@ -93,8 +113,7 @@ func colorizeVT100(s string) string {
 	return s
 }
 
-func colorizeHtml(s string) string {
-
+func ColorizeHtml(s string) string {
 	do := func(s string, brackets string, color string) string {
 		a := string(brackets[0])
 		b := string(brackets[1])
@@ -121,38 +140,22 @@ func colorizeHtml(s string) string {
 	return s
 }
 
-func VT100Sprintf(format string, a ...any) string {
-	if VT100ColorizeParams {
+func Sprintf(format string, a ...any) string {
+	if ColorizeParams {
 		s := fmt.Sprintf(format, a...)
-		return colorizeVT100(s)
+		return ColorizeVT100(s)
 	}
-	return fmt.Sprintf(colorizeVT100(format), a...)
+	return fmt.Sprintf(ColorizeVT100(format), a...)
 }
 
-func VT100Printf(format string, a ...any) {
-	fmt.Print(VT100Sprintf(format, a...))
+func Printf(format string, a ...any) {
+	fmt.Print(Sprintf(format, a...))
 }
 
 func HtmlSprintf(format string, a ...any) string {
-	if VT100ColorizeParams {
+	if ColorizeParams {
 		s := fmt.Sprintf(format, a...)
-		return colorizeHtml(s)
+		return ColorizeHtml(s)
 	}
-	return fmt.Sprintf(colorizeHtml(format), a...)
-}
-
-func EscapeMarkers(s string) string {
-	repl := []struct{ from, to string }{
-		{"*", "∗"}, // U+2217 ASTERISK OPERATOR
-		{"#", "＃"}, // U+FF03 FULLWIDTH NUMBER SIGN
-		{"'", "’"}, // U+2019 RIGHT SINGLE QUOTATION MARK
-		{"{", "｛"}, // U+FF5B FULLWIDTH LEFT CURLY BRACKET
-		{"}", "｝"}, // U+FF5D FULLWIDTH RIGHT CURLY BRACKET
-	}
-	for _, r := range repl {
-		if strings.Contains(s, r.from) {
-			s = strings.ReplaceAll(s, r.from, r.to)
-		}
-	}
-	return s
+	return fmt.Sprintf(ColorizeHtml(format), a...)
 }
