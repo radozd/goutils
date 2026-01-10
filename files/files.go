@@ -36,12 +36,12 @@ func IsEmptyDirectory(name string) (bool, error) {
 }
 
 func FormatSize(size uint64) string {
-	sizeMB := (int)(size / 1024 / 1024)
-	if sizeMB < 1024 {
-		return strconv.Itoa(sizeMB) + "MB"
+	size_mb := (int)(size / 1024 / 1024)
+	if size_mb < 1024 {
+		return strconv.Itoa(size_mb) + "MB"
 	}
-	if sizeMB < 1024*1024 {
-		return strconv.Itoa(int(sizeMB/1024)) + "GB"
+	if size_mb < 1024*1024 {
+		return strconv.Itoa(int(size_mb/1024)) + "GB"
 	}
-	return fmt.Sprintf("%.1fTB", float64(sizeMB)/1024/1024)
+	return fmt.Sprintf("%.1fTB", float64(size_mb)/1024/1024)
 }

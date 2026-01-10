@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/radozd/goutils/text"
 )
@@ -32,6 +33,33 @@ func Color(code int) string {
 
 const Bold string = "\033[1m"
 const ResetAttr string = "\033[0m"
+
+func stripVT100(s string) string {
+	do := func(s string, brackets string) string {
+		a := string(brackets[0])
+		b := string(brackets[1])
+
+		for {
+			s2 := text.ReplaceBetweenInc(s, a, b, text.TakeBetween(s, a, b))
+			if s == s2 {
+				break
+			}
+			s = s2
+		}
+		return s
+	}
+
+	s = do(s, "{}")
+
+	s = do(s, "``")
+	s = do(s, "''")
+	s = do(s, "##")
+	s = do(s, "@@")
+
+	s = do(s, "**")
+
+	return s
+}
 
 func colorizeVT100(s string) string {
 	do := func(s string, brackets string, color int) string {
@@ -94,6 +122,10 @@ func colorizeHtml(s string) string {
 }
 
 func VT100Sprintf(format string, a ...any) string {
+	if VT100ColorizeParams {
+		s := fmt.Sprintf(format, a...)
+		return colorizeVT100(s)
+	}
 	return fmt.Sprintf(colorizeVT100(format), a...)
 }
 
@@ -102,5 +134,25 @@ func VT100Printf(format string, a ...any) {
 }
 
 func HtmlSprintf(format string, a ...any) string {
+	if VT100ColorizeParams {
+		s := fmt.Sprintf(format, a...)
+		return colorizeHtml(s)
+	}
 	return fmt.Sprintf(colorizeHtml(format), a...)
+}
+
+func EscapeMarkers(s string) string {
+	repl := []struct{ from, to string }{
+		{"*", "∗"}, // U+2217 ASTERISK OPERATOR
+		{"#", "＃"}, // U+FF03 FULLWIDTH NUMBER SIGN
+		{"'", "’"}, // U+2019 RIGHT SINGLE QUOTATION MARK
+		{"{", "｛"}, // U+FF5B FULLWIDTH LEFT CURLY BRACKET
+		{"}", "｝"}, // U+FF5D FULLWIDTH RIGHT CURLY BRACKET
+	}
+	for _, r := range repl {
+		if strings.Contains(s, r.from) {
+			s = strings.ReplaceAll(s, r.from, r.to)
+		}
+	}
+	return s
 }

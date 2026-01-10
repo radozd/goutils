@@ -18,10 +18,13 @@ func TestTerminal(t *testing.T) {
 	logger.EchoConsole = true
 	logger.VT100Console = true
 	l := logger.NewLogger()
-	defer l.Close()
 
 	log.Println("{test} 'string' #number# to *do*")
-	log.Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total Rekall.mp4")
+	log.Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total *R*ekall.mp4")
+	logger.VT100Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total *R*ekall.mp4")
+	logger.VT100ColorizeParams = true
+	logger.VT100Printf("`warning` @newer@ file at the same path: `%s`\n", "/Total *R*ekall.mp4")
+	l.Close()
 }
 
 func TestZstd(t *testing.T) {

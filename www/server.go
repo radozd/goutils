@@ -106,11 +106,11 @@ func Serve(ctx context.Context, port int, page string, serverSSE *SseBroker, pro
 		serverSSE.Stop()
 	}
 
-	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx_shutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var err error
-	if err = server.Shutdown(ctxShutDown); err != nil {
+	if err = server.Shutdown(ctx_shutdown); err != nil {
 		log.Fatalf("WWW: shutdown failed:%+s", err)
 	}
 
@@ -127,18 +127,18 @@ func Run(serve func(context.Context, chan os.Signal) error) {
 	defer logger.Close()
 	log.Println("--------------------------------------")
 
-	programInterrupt := make(chan os.Signal, 1)
-	signal.Notify(programInterrupt, os.Interrupt)
+	program_interrupt := make(chan os.Signal, 1)
+	signal.Notify(program_interrupt, os.Interrupt)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
-		oscall := <-programInterrupt
+		oscall := <-program_interrupt
 		log.Printf("WWW: system call:%+v", oscall)
 		cancel()
 	}()
 
-	if err := serve(ctx, programInterrupt); err != nil {
+	if err := serve(ctx, program_interrupt); err != nil {
 		log.Printf("WWW: failed to serve:+%v\n", err)
 	}
 }
