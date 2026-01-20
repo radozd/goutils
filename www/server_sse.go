@@ -37,16 +37,16 @@ func (m *SseMessage) String() string {
 	var buffer bytes.Buffer
 
 	if m.retry > 0 {
-		buffer.WriteString(fmt.Sprintf("retry: %d\n", m.retry))
+		fmt.Fprintf(&buffer, "retry: %d\n", m.retry)
 	}
 	if len(m.event) > 0 {
-		buffer.WriteString(fmt.Sprintf("event: %s\n", m.event))
+		fmt.Fprintf(&buffer, "event: %s\n", m.event)
 	}
 	if len(m.data) > 0 {
-		buffer.WriteString(fmt.Sprintf("data: %s\n", strings.Replace(m.data, "\n", "\ndata: ", -1)))
+		fmt.Fprintf(&buffer, "data: %s\n", strings.Replace(m.data, "\n", "\ndata: ", -1))
 	}
 	if m.id > 0 {
-		buffer.WriteString(fmt.Sprintf("id: %d\n", m.id))
+		fmt.Fprintf(&buffer, "id: %d\n", m.id)
 	}
 	buffer.WriteString("\n")
 
@@ -70,11 +70,12 @@ func (b *SseBroker) String() string {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	str := fmt.Sprintf("SSE: clients=%d, nextId=%d\n", len(b.clients), b.nextMessageId)
+	var str strings.Builder
+	str.WriteString(fmt.Sprintf("SSE: clients=%d, nextId=%d\n", len(b.clients), b.nextMessageId))
 	for _, cli := range b.clients {
-		str += "  " + cli.String() + "\n"
+		str.WriteString("  " + cli.String() + "\n")
 	}
-	return str
+	return str.String()
 }
 
 func StartSseBroker(debugLog bool) *SseBroker {
@@ -229,6 +230,9 @@ func (b *SseBroker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	f.Flush()
 	cli.lastMessageSent = time.Now()
 
+	keepalive := time.NewTicker(30 * time.Second)
+	defer keepalive.Stop()
+
 	ctx := r.Context()
 	for {
 		select {
@@ -241,6 +245,11 @@ func (b *SseBroker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			msg := b.MakeMessage(str)
 			fmt.Fprint(w, msg.String())
+			f.Flush()
+			cli.lastMessageSent = time.Now()
+
+		case <-keepalive.C:
+			fmt.Fprint(w, ":\n\n")
 			f.Flush()
 			cli.lastMessageSent = time.Now()
 
